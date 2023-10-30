@@ -23,7 +23,16 @@ struct ContentView: View {
                     NavigationLink {
                         Text("Item at \(item.timestamp!, formatter: itemFormatter)")
                     } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                        HStack {
+                            Text(item.timestamp!, formatter: itemFormatter)
+                            
+                            Spacer()
+                            
+                            if item.hasEvenMinsAndSeconds {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.green)
+                            }
+                        }
                     }
                 }
                 .onDelete(perform: deleteItems)
@@ -44,10 +53,18 @@ struct ContentView: View {
 
     private func addItem() {
         withAnimation {
+            let now = Date.now
             let newItem = Item(context: viewContext)
             newItem.timestamp = Date()
+            newItem.hasEvenMinsAndSeconds = dateIsAllEven(now)
             try? viewContext.save()
         }
+    }
+    
+    private func dateIsAllEven(_ date: Date) -> Bool {
+        let min = Calendar.current.component(.minute, from: date)
+        let sec = Calendar.current.component(.second, from: date)
+        return min % 2 == 0 && sec % 2 == 0
     }
 
     private func deleteItems(offsets: IndexSet) {
